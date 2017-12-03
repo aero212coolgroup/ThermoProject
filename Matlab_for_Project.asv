@@ -23,17 +23,19 @@ P2s = cpr * P0;
 pr1 = .7937;
 %%  Initial Values
 
-    pr2s = P2s/P0*pr1;
+    pr2s = P2/P0*pr1;
    
     %Find Higher Properties for Interpolation
     rows = find(IdealPropertiesofAir.T>T0,1);
-
+    vars = {'T', 'h'};
+    T2 = IdealPropertiesofAir(rows, vars);
     Temp2 = IdealPropertiesofAir.T(rows);
     h2 = IdealPropertiesofAir.h(rows);
     
     %Find Lower Properties for Interpolation
     rows1 = find(IdealPropertiesofAir.T<T0,1,'last');
-
+    vars1 = {'T', 'h'};
+    T3 = IdealPropertiesofAir(rows1, vars1);
     Temp3 = IdealPropertiesofAir.T(rows1);
     h3 = IdealPropertiesofAir.h(rows1);
     
@@ -46,13 +48,15 @@ pr1 = .7937;
     %%
         %Find Higher Properties for Interpolation
     rows2 = find(IdealPropertiesofAir.pf>pr2s,1);
-
+    vars2 = {'pf', 'h'};
+    T4 = IdealPropertiesofAir(rows2, vars2);
     pf4 = IdealPropertiesofAir.pf(rows2);
     h4 = IdealPropertiesofAir.h(rows2);
     
         %Find Lower Properties for Interpolation
     rows3 = find(IdealPropertiesofAir.pf<pr2s,1,'last');
-
+    vars3 = {'pf', 'h'};
+    T5 = IdealPropertiesofAir(rows3, vars3);
     pf5 = IdealPropertiesofAir.pf(rows3);
     h5 = IdealPropertiesofAir.h(rows3);
     
@@ -66,25 +70,25 @@ pr1 = .7937;
     h2w = vpasolve(ce == (h2s - h1)/(h2w - h1),h2w);
     
     %% Solve for Temperature after stage 1 of compressor
-    
-    
     %% Solve for specific entropy after stage 1 of compressor
             %Find Higher Properties for Interpolation
     rows4 = find(IdealPropertiesofAir.h>h2w,1);
-
+    vars4 = {'h', 's'};
+    T6 = IdealPropertiesofAir(rows4, vars4);
     h6 = IdealPropertiesofAir.h(rows4);
     s6 = IdealPropertiesofAir.s(rows4);
     
         %Find Lower Properties for Interpolation
     rows5 = find(IdealPropertiesofAir.h<h2w,1,'last');
-
+    vars5 = {'h', 's'};
+    T7 = IdealPropertiesofAir(rows5, vars5);
     h7 = IdealPropertiesofAir.h(rows5);
     s7 = IdealPropertiesofAir.s(rows5);
     
-        syms ent
-    ent = vpasolve((h2w-h7)/(ent - s7)==(h6-h7)/(s6-s7),ent);
+        syms h2s
+    ent = vpasolve((h2w-h7)/(ent - s7)==(h6-h7)/(h6-h7),h2s);
     
-    %% Solve for specific volume after stage 1 of compressor
+    %% Solve for specific colume after stage 1 of compressor
     %% Solve for pressure after first stage of compressor
     %p2 = P0 * Temperature / T0
     %% Put in loop to iterate 14 times
