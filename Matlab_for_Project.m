@@ -21,9 +21,15 @@ ce = 0.97;
 P2s = cpr * P0;
 % Initial Reduced Pressure 
 pr1 = .7937;
+% Critical Temp of air
+Tc = 132.65;
+% Critical Pressure of Air (Pa)
+Pc = 3774356;
+% R constant
+R = 8.314;
 %%  Initial Values
 
-    pr2s = P2/P0*pr1;
+    pr2s = P2s/P0*pr1;
    
     %Find Higher Properties for Interpolation
     rows = find(IdealPropertiesofAir.T>T0,1);
