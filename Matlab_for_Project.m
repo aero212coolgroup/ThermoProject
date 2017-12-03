@@ -1,25 +1,26 @@
+% Values for table: T h u s pf vf
 % Velocity in (m/s)
 vin = 76.38888;
 % Air Mass Flow Rate (kg/s)
-mdot = 97.4264;
+mdot = 51.6083;
 % Fuel + Air Mass Flow Rate (kg/hr)
-FAmdot = 5858.451;
+FAmdot = 3338.4583;
 
 %% Assumptions
 % Air Density (kg/m^3)
-ro = 1.2754;
+ro = 0.6756;
 % Initial Temperature (K)
-T0 = 273.15;
+T0 = 255.65;
 % Initial Pressure (kPa)
-P0 = 100;
+P0 = 49.586;
 % Compressor Pressure Ratio Per Stage
 cpr = 40/14;
 % Compressor Efficiency 
 ce = 0.97;
-% Initial Pressure
+% Pressure after first compressor
 P2 = cpr * P0;
 % Initial Reduced Pressure 
-pr1 = 1;
+pr1 = .7937;
 %%  Initial Values
 
     pr2s = P2/P0*pr1;
@@ -74,7 +75,7 @@ pr1 = 1;
     vars3 = {'T', 'pf'};
     T6 = IdealPropertiesofAir(rows3, vars3);
     Tf6 = IdealPropertiesofAir.T(rows3);
-    pf6 = IdealPropertiesofAir.[f(rows3);
+    pf6 = IdealPropertiesofAir.pf(rows3);
     
         %Find Lower Properties for Interpolation
     rows4 = find(IdealPropertiesofAir.pf<pr2s,1,'last');
