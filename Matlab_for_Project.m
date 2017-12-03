@@ -27,34 +27,34 @@ pr1 = .7937;
    
     %Find Higher Properties for Interpolation
     rows = find(IdealPropertiesofAir.T>T0,1);
-    Temp2 = IdealPropertiesofAir.T(rows);
-    h2 = IdealPropertiesofAir.h(rows);
+    THigh = IdealPropertiesofAir.T(rows);
+    hHigh = IdealPropertiesofAir.h(rows);
     
     %Find Lower Properties for Interpolation
     rows = find(IdealPropertiesofAir.T<T0,1,'last');
-    Temp3 = IdealPropertiesofAir.T(rows);
-    h3 = IdealPropertiesofAir.h(rows);
+    TLow = IdealPropertiesofAir.T(rows);
+    hLow = IdealPropertiesofAir.h(rows);
     
     % Solve for unknown h1 (Initial Enthalpy)
     syms h1
-    h1 = vpasolve((T0-Temp3)/(h1-h3) == (Temp2-Temp3)/(h2-h3),h1);
+    h1 = vpasolve((T0-TLow)/(h1-hLow) == (THigh-TLow)/(hHigh-hLow),h1);
   
     %while 1i < 15
     % 1i = 1;
     %%
         %Find Higher Properties for Interpolation
     rows = find(IdealPropertiesofAir.pf>pr2s,1);
-    pf4 = IdealPropertiesofAir.pf(rows);
-    h4 = IdealPropertiesofAir.h(rows);
+    prHigh = IdealPropertiesofAir.pf(rows);
+    hHigh = IdealPropertiesofAir.h(rows);
     
         %Find Lower Properties for Interpolation
     rows = find(IdealPropertiesofAir.pf<pr2s,1,'last');
-    pf5 = IdealPropertiesofAir.pf(rows);
-    h5 = IdealPropertiesofAir.h(rows);
+    prLow = IdealPropertiesofAir.pf(rows);
+    hLow = IdealPropertiesofAir.h(rows);
     
         %solve for unknown h2s (Ideal enthalpy after compression)
     syms h2s
-    h2s = vpasolve((h2s-h5)/(pr2s - pf5)==(h4-h5)/(pf4-pf5),h2s)
+    h2s = vpasolve((h2s-hLow)/(pr2s - prLow)==(hHigh-hLow)/(prHigh-prLow),h2s)
     
     % solve for unknown h2w (actual h2 after compression)
     
@@ -67,33 +67,29 @@ pr1 = .7937;
     syms t2 %t2=temperature after 1st compressor
     
      %Find Higher Properties for Interpolation
-    rows6 = find(IdealPropertiesofAir.h>h2w,1);
-    tgreater = IdealPropertiesofAir.T(rows6);
-    hgreater = IdealPropertiesofAir.h(rows6);
+    rows = find(IdealPropertiesofAir.h>h2w,1);
+    THigh = IdealPropertiesofAir.T(rows);
+    hHigh = IdealPropertiesofAir.h(rows);
     
         %Find Lower Properties for Interpolation
-    rows7 = find(IdealPropertiesofAir.h<h2w,1,'last');
-    tlesser = IdealPropertiesofAir.T(rows7);
-    hlesser = IdealPropertiesofAir.h(rows7);
+    rows = find(IdealPropertiesofAir.h<h2w,1,'last');
+    TLow = IdealPropertiesofAir.T(rows);
+    hLow = IdealPropertiesofAir.h(rows);
     
-    t2 = vpasolve((tgreater-tlesser)/(hgreater-hlesser) == (t2-tlesser)/(h2w-hlesser),t2);
+    t2 = vpasolve((THigh-TLow)/(hHigh-hLow) == (t2-TLow)/(h2w-hLow),t2);
     %% Solve for specific entropy after stage 1 of compressor
             %Find Higher Properties for Interpolation
-    rows4 = find(IdealPropertiesofAir.h>h2w,1);
-    vars4 = {'h', 's'};
-    T6 = IdealPropertiesofAir(rows4, vars4);
-    h6 = IdealPropertiesofAir.h(rows4);
-    s6 = IdealPropertiesofAir.s(rows4);
+    rows = find(IdealPropertiesofAir.h>h2w,1);
+    hHigh = IdealPropertiesofAir.h(rows);
+    sHigh = IdealPropertiesofAir.s(rows);
     
         %Find Lower Properties for Interpolation
-    rows5 = find(IdealPropertiesofAir.h<h2w,1,'last');
-    vars5 = {'h', 's'};
-    T7 = IdealPropertiesofAir(rows5, vars5);
-    h7 = IdealPropertiesofAir.h(rows5);
-    s7 = IdealPropertiesofAir.s(rows5);
+    rows = find(IdealPropertiesofAir.h<h2w,1,'last');
+    hLow = IdealPropertiesofAir.h(rows);
+    sLow = IdealPropertiesofAir.s(rows);
     
         syms ent
-    ent = vpasolve((h2w-h7)/(ent - s7)==(h6-h7)/(s6-s7),ent);
+    ent = vpasolve((h2w-hLow)/(ent - sLow)==(hHigh-hLow)/(sHigh-sLow),ent);
     
     %% Solve for specific colume after stage 1 of compressor
     %% Solve for pressure after first stage of compressor
