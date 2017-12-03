@@ -22,7 +22,7 @@ P2 = cpr * P0;
 pr1 = .7937;
 %%  Initial Values
 
-    pr2s = P2s/P0*pr1;
+    pr2s = P2/P0*pr1;
    
     %Find Higher Properties for Interpolation
     rows = find(IdealPropertiesofAir.T>T0,1);
@@ -88,31 +88,5 @@ pr1 = .7937;
     hlesser = IdealPropertiesofAir.h(rows4);
     
     t2 = vpasolve((tgreater-tlesser)/(hgreater-hlesser) == (t2-tlesser)/(h2w-hlesser),t2)
-    h2w = vpasolve(ce == (h2s - h1)/(h2w - h1),h2w);
-    
-    %% Solve for Temperature after stage 1 of compressor
-    
-    
-    %% Solve for specific entropy after stage 1 of compressor
-            %Find Higher Properties for Interpolation
-    rows4 = find(IdealPropertiesofAir.h>h2w,1);
-
-    h6 = IdealPropertiesofAir.h(rows4);
-    s6 = IdealPropertiesofAir.s(rows4);
-    
-        %Find Lower Properties for Interpolation
-    rows5 = find(IdealPropertiesofAir.h<h2w,1,'last');
-
-    h7 = IdealPropertiesofAir.h(rows5);
-    s7 = IdealPropertiesofAir.s(rows5);
-    
-        syms ent
-    ent = vpasolve((h2w-h7)/(ent - s7)==(h6-h7)/(s6-s7),ent);
-    
-    %% Solve for specific volume after stage 1 of compressor
-    %% Solve for pressure after first stage of compressor
-    %p2 = P0 * Temperature / T0
-    %% Put in loop to iterate 14 times
-    %%
     
         
