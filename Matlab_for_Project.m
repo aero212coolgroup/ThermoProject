@@ -97,8 +97,6 @@ R = 8.314;
         syms ent
     ent = vpasolve((h2w-hLow)/(ent - sLow)==(hHigh-hLow)/(sHigh-sLow),ent);
     
-    %% Solve for specific colume after stage 1 of compressor
-    %% Solve for pressure after first stage of compressor
-    %p2 = P0 * Temperature / T0
+    %% Solve for specific volume after stage 1 of compressor
     %% Put in loop to iterate 14 times
     %%
