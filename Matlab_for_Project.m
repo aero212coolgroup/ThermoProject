@@ -98,5 +98,20 @@ R = 8.314;
     ent = vpasolve((h2w-hLow)/(ent - sLow)==(hHigh-hLow)/(sHigh-sLow),ent);
     
     %% Solve for specific volume after stage 1 of compressor
+    
+   %interpolate for vf
+   
+   %Find Higher Properties for Interpolation
+    rows = find(IdealPropertiesofAir.h>h2w,1);
+    hHigh = IdealPropertiesofAir.h(rows);
+    vfHigh = IdealPropertiesofAir.vf(rows);
+    
+        %Find Lower Properties for Interpolation
+    rows = find(IdealPropertiesofAir.h<h2w,1,'last');
+    hLow = IdealPropertiesofAir.h(rows);
+    vfLow = IdealPropertiesofAir.vf(rows);
+    
+        syms vf2
+    vf2 = vpasolve((h2w-hLow)/(vf2 - vfLow)==(hHigh-hLow)/(vfHigh-vfLow),vf2)
     %% Put in loop to iterate 14 times
     %%
