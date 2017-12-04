@@ -84,7 +84,7 @@ h1 = vpasolve((T0-TLow)/(h1-hLow) == (THigh-TLow)/(hHigh-hLow),h1);
 for i = 1:1:14% loop to make this repeat 14 times
 %P2s = cpr * P0;
 
-pr2s = 40.^(i/14) * pr1;
+pr2s = 40.^(i/14) * pr1
 
 %%
 %Find Higher Properties for Interpolation
@@ -99,7 +99,7 @@ hLow = IdealPropertiesofAir.h(rows);
 
 %solve for unknown h2s (Ideal enthalpy after compression)
 syms h2s
-h2s = vpasolve((h2s-hLow)/(pr2s - prLow)==(hHigh-hLow)/(prHigh-prLow),h2s);
+h2s = vpasolve((h2s-hLow)/(pr2s - prLow)==(hHigh-hLow)/(prHigh-prLow),h2s)
 
 % solve for unknown h2w (actual h2 after compression)
 
@@ -205,6 +205,7 @@ syms h3
 h3 = vpasolve(QdotMdot == h3 - h2w,h3);
 
 
+
 %Interpolate T from h
 
 syms t2 %t2=temperature after 1st compressor
@@ -243,7 +244,7 @@ statevariables.s(16) = ent;
 for j = 1:1:4% loop to make this repeat 4 times
 %P2s = cpr * P0;
 
-pr3s = 1/(40.^(j/4)) * pf2;
+pr3s = 1/(1.46275964.^(j/4)) * pr2s;
 
 %%
 %Find Higher Properties for Interpolation
@@ -318,7 +319,7 @@ vf3 = vpasolve((h4-hLow)/(vf3 - vfLow)==(hHigh-hLow)/(vfHigh-vfLow),vf3);
     %pf2 = pf2 * 1/(40.^(j/4));%vpasolve((h2w-hLow)/(pf2 - pfLow)==(hHigh-hLow)/(pfHigh-pfLow),pf2);
 
 %  Ideal pressure after first compressor
-P2s = 1983.4 * (1/(40.^(j/4)));
+P2s = 1983.4 * 1/(1.46275964.^(j/4));
 %resets initial variables as new state
 
 statevariables.p(j+16) = P2s;
