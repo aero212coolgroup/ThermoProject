@@ -162,9 +162,10 @@ pfLow = IdealPropertiesofAir.pf(rows);
 syms pf2
 pf2 = vpasolve((h2w-hLow)/(pf2 - pfLow)==(hHigh-hLow)/(pfHigh-pfLow),pf2);
 
-
+%  Ideal pressure after first compressor
+P2s = 40.^(i/14) * 49.586;
 %store all necessary state data in table
-statevariables.p(i+1) = P0;
+statevariables.p(i+1) = P2s;
 statevariables.v(i+1) = speciv;
 statevariables.T(i+1) = t2;
 statevariables.s(i+1) = ent;
@@ -174,8 +175,7 @@ statevariables.s(i+1) = ent;
 T0 = t2;
 % Initial Pressure (kPa)
 
-%  Ideal pressure after first compressor
-P2s = 40.^(i/14) * 49.586;
+
 % Initial Reduced Pressure
 %pr1 = pf2
 P0 = P2s;%Not sure about this one: where is p @state 2 calculated?
