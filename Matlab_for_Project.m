@@ -21,12 +21,40 @@ ce = 0.97;
 P2s = cpr * P0;
 % Initial Reduced Pressure
 pr1 = .7937;
-% Critical Temp of air
+% Critical Temp of air(K)
 Tc = 132.65;
-% Critical Pressure of Air (Pa)
+% Critical Pressure of Air(Pa)
 Pc = 3774356;
-% R constant
+% R constant(kJ/(kmol*K))
 R = 8.314;
+% Molar Mass of Air(kg/kmol)
+M = 28.97;
+
+%initializing table
+%table collects data about states after the listed change
+%ex: c1 = state after first compression
+z=zeros(21);
+statevariables = table(z(:,1),z(:,1),z(:,1),z(:,1),'VariableNames',{'p','v','T','s'},'RowNames',{'cinitial','c1','c2','c3','c4','c5','c6','c7','c8','c9','c10','c11','c12','c13','c14','combust','t1','t2','t3','t4','n'});%,'RowNames',{'cinitial','c1','c2','c3','c4','c5','c6','c7','c8','c9','c10','c11','c12','c13','c14','combust','t1','t2','t3','t4','n'};
+%put known values into table
+statevariables.T(1) = T0;
+statevariables.p(1) = P0;
+statevariables.v(1) = R*T0/(P0*M);
+
+%interpolate for s initial
+%Find Higher Properties for Interpolation
+rows = find(IdealPropertiesofAir.T>T0,1);
+THigh = IdealPropertiesofAir.T(rows);
+sHigh = IdealPropertiesofAir.s(rows);
+
+%Find Lower Properties for Interpolation
+rows = find(IdealPropertiesofAir.T<T0,1,'last');
+TLow = IdealPropertiesofAir.T(rows);
+sLow = IdealPropertiesofAir.s(rows);
+
+% Solve for unknown h1 (Initial Enthalpy)
+syms s1
+s1 = vpasolve((T0-TLow)/(s1-sLow) == (THigh-TLow)/(sHigh-sLow),s1);
+statevariables.s(1) = s1
 %%  Initial Values
 
 
@@ -116,6 +144,7 @@ h1 = vpasolve((T0-TLow)/(h1-hLow) == (THigh-TLow)/(hHigh-hLow),h1);
     
     syms vf2
     vf2 = vpasolve((h2w-hLow)/(vf2 - vfLow)==(hHigh-hLow)/(vfHigh-vfLow),vf2);
+    
     
     %interpolate for pr2
     %Find Higher Properties for Interpolation
