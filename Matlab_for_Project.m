@@ -76,9 +76,8 @@ h1 = vpasolve((T0-TLow)/(h1-hLow) == (THigh-TLow)/(hHigh-hLow),h1);
 for i = 1:1:14% loop to make this repeat 14 times
 %P2s = cpr * P0;
 
-pr2s = P2s/P0*pr1;%shouldn't this be pr1/cpr
-%while 1i < 15
-% 1i = 1;
+pr2s = cpr*pr1;
+
 %%
 %Find Higher Properties for Interpolation
 rows = find(IdealPropertiesofAir.pf>pr2s,1);
@@ -160,7 +159,7 @@ hLow = IdealPropertiesofAir.h(rows);
 pfLow = IdealPropertiesofAir.pf(rows);
 
 syms pf2
-pf2 = vpasolve((h2w-hLow)/(pf2 - pfLow)==(hHigh-hLow)/(pfHigh-pfLow),pf2);
+pf2 = vpasolve((h2w-hLow)/(pf2 - pfLow)==(hHigh-hLow)/(pfHigh-pfLow),pf2)
 
 
 %store all necessary state data in table
@@ -177,7 +176,7 @@ P0 = P2s;%Not sure about this one: where is p @state 2 calculated?
 %  Ideal pressure after first compressor
 P2s = cpr * P0;
 % Initial Reduced Pressure
-pr1 = pf2;
+pr1 = pf2
 %h
 h1=h2w;
 
