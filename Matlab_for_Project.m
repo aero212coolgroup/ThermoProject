@@ -33,12 +33,14 @@ Pc = 3774356;
 R = 8.314;
 % Molar Mass of Air(kg/kmol)
 M = 28.97;
+% mdot for afterburner (kg/s)
+mdotaft = (-400 + 110 * mdot)/3600;
 
 %initializing table
 %table collects data about states after the listed change
 %ex: c1 = state after first compression
-z=zeros(21);
-statevariables = table(z(:,1),z(:,1),z(:,1),z(:,1),'VariableNames',{'p','v','T','s'},'RowNames',{'cinitial','c1','c2','c3','c4','c5','c6','c7','c8','c9','c10','c11','c12','c13','c14','combust','t1','t2','t3','t4','n'});%,'RowNames',{'cinitial','c1','c2','c3','c4','c5','c6','c7','c8','c9','c10','c11','c12','c13','c14','combust','t1','t2','t3','t4','n'};
+z=zeros(22);
+statevariables = table(z(:,1),z(:,1),z(:,1),z(:,1),'VariableNames',{'p','v','T','s'},'RowNames',{'cinitial','c1','c2','c3','c4','c5','c6','c7','c8','c9','c10','c11','c12','c13','c14','combust','t1','t2','t3','t4','burner','n'});%,'RowNames',{'cinitial','c1','c2','c3','c4','c5','c6','c7','c8','c9','c10','c11','c12','c13','c14','combust','t1','t2','t3','t4','n'};
 %put known values into table
 statevariables.T(1) = T0;%T in K
 statevariables.p(1) = P0;%P in kPa
@@ -332,6 +334,45 @@ statevariables.s(j+16) = ent3;
 %h
 %h1=h2w;
 end
+% afterburner section
 
+qdot_aft = mdotaft * Qcomb;
+qdotmdot_aft = qdot_aft / mdot;
+syms h5
+h5 = vpasolve(qdotmdot_aft == h5 - h4,h5);
 
+%Interpolate T from h
+
+syms t3 %t2=temperature after 1st compressor
+
+%Find Higher Properties for Interpolation
+rows = find(IdealPropertiesofAir.h>h5,1);
+THigh = IdealPropertiesofAir.T(rows);
+hHigh = IdealPropertiesofAir.h(rows);
+
+%Find Lower Properties for Interpolation
+rows = find(IdealPropertiesofAir.h<h5,1,'last');
+TLow = IdealPropertiesofAir.T(rows);
+hLow = IdealPropertiesofAir.h(rows);
+
+t3 = vpasolve((THigh-TLow)/(hHigh-hLow) == (t3-TLow)/(h5-hLow),t3);
+
+%solve for s from h
+%Find Higher Properties for Interpolation
+rows = find(IdealPropertiesofAir.h>h5,1);
+hHigh = IdealPropertiesofAir.h(rows);
+sHigh = IdealPropertiesofAir.s(rows);
+
+%Find Lower Properties for Interpolation
+rows = find(IdealPropertiesofAir.h<h5,1,'last');
+hLow = IdealPropertiesofAir.h(rows);
+sLow = IdealPropertiesofAir.s(rows);
+
+syms ent
+ent = vpasolve((h5-hLow)/(ent - sLow)==(hHigh-hLow)/(sHigh-sLow),ent);
+
+statevariables.p(21) = statevariables.p(15);
+statevariables.v(21) = R*t3/(statevariables.p(15)*M);
+statevariables.T(21) = t3;
+statevariables.s(21) = ent;
 
