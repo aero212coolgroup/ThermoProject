@@ -373,11 +373,49 @@ sLow = IdealPropertiesofAir.s(rows);
 syms ent
 ent = vpasolve((h5-hLow)/(ent - sLow)==(hHigh-hLow)/(sHigh-sLow),ent);
 
-statevariables.p(21) = statevariables.p(15);
+statevariables.p(21) = statevariables.p(20);
 statevariables.v(21) = R*t3/(statevariables.p(15)*M);
 statevariables.T(21) = t3;
 statevariables.s(21) = ent;
 
 %% Nozzle Section
 
+syms h6
+
+h6 = vpasolve(0.94 == (h5 - h6) / (h5 - 255.7226), h6);
+
+%Interpolate T from h
+
+syms t3 %t2=temperature after 1st compressor
+
+%Find Higher Properties for Interpolation
+rows = find(IdealPropertiesofAir.h>h6,1);
+THigh = IdealPropertiesofAir.T(rows);
+hHigh = IdealPropertiesofAir.h(rows);
+
+%Find Lower Properties for Interpolation
+rows = find(IdealPropertiesofAir.h<h6,1,'last');
+TLow = IdealPropertiesofAir.T(rows);
+hLow = IdealPropertiesofAir.h(rows);
+
+t3 = vpasolve((THigh-TLow)/(hHigh-hLow) == (t3-TLow)/(h6-hLow),t3);
+
+%solve for s from h
+%Find Higher Properties for Interpolation
+rows = find(IdealPropertiesofAir.h>h6,1);
+hHigh = IdealPropertiesofAir.h(rows);
+sHigh = IdealPropertiesofAir.s(rows);
+
+%Find Lower Properties for Interpolation
+rows = find(IdealPropertiesofAir.h<h6,1,'last');
+hLow = IdealPropertiesofAir.h(rows);
+sLow = IdealPropertiesofAir.s(rows);
+
+syms ent
+ent = vpasolve((h6-hLow)/(ent - sLow)==(hHigh-hLow)/(sHigh-sLow),ent);
+
+statevariables.p(22) = statevariables.p(15);
+statevariables.v(22) = R*t3/(statevariables.p(15)*M);
+statevariables.T(22) = t3;
+statevariables.s(22) = ent;
 
