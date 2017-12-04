@@ -35,6 +35,8 @@ R = 8.314;
 M = 28.97;
 % mdot for afterburner (kg/s)
 mdotaft = (-400 + 110 * mdot)/3600;
+% Nozzle exit area (m^2)
+Narea = 0.5 * 0.3;
 
 %initializing table
 %table collects data about states after the listed change
@@ -375,4 +377,7 @@ statevariables.p(21) = statevariables.p(15);
 statevariables.v(21) = R*t3/(statevariables.p(15)*M);
 statevariables.T(21) = t3;
 statevariables.s(21) = ent;
+
+%% Nozzle Section
+
 
