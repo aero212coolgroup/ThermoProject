@@ -184,4 +184,14 @@ h1=h2w;
 
 end % still needs a way to tabulate data
 %% Put in loop to iterate 14 times
-%%
+%% 
+
+% Calculate the heat addition by the combustion chamber 
+mdot_air = 51.6083;
+Qcomb = 43360;
+mdot_comb = 0.92733333;
+Qdot = Qcomb * mdot_comb;
+QdotMdot = Qdot/mdot_air;
+
+syms h3
+h3 = vpasolve(QdotMdot == h3 - h2w,h3);
