@@ -236,4 +236,102 @@ statevariables.v(16) = R*t2/(statevariables.p(15)*M);
 statevariables.T(16) = t2;
 statevariables.s(16) = ent;
 
+for j = 1:1:4% loop to make this repeat 4 times
+%P2s = cpr * P0;
+
+pr3s = 1/(40.^(j/4)) * pf2;
+
+%%
+%Find Higher Properties for Interpolation
+rows = find(IdealPropertiesofAir.pf>pr3s,1);
+prHigh = IdealPropertiesofAir.pf(rows);
+hHigh = IdealPropertiesofAir.h(rows);
+
+%Find Lower Properties for Interpolation
+rows = find(IdealPropertiesofAir.pf<pr3s,1,'last');
+prLow = IdealPropertiesofAir.pf(rows);
+hLow = IdealPropertiesofAir.h(rows);
+
+%solve for unknown h2s (Ideal enthalpy after compression)
+syms h3s
+h3s = vpasolve((hHigh-h3s)/(prHigh-pr3s)==(hHigh-hLow)/(prHigh-prLow),h3s);
+
+% solve for unknown h2w (actual h2 after compression)
+
+syms h4
+h4 = vpasolve(.94 == (h4 - h3)/(h3s-h3),h4);
+
+%% Solve for Temperature after stage 1 of compressor
+%Interpolate T from h
+
+syms t3 %t2=temperature after 1st compressor
+
+%Find Higher Properties for Interpolation
+rows = find(IdealPropertiesofAir.h>h4,1);
+THigh = IdealPropertiesofAir.T(rows);
+hHigh = IdealPropertiesofAir.h(rows);
+
+%Find Lower Properties for Interpolation
+rows = find(IdealPropertiesofAir.h<h4,1,'last');
+TLow = IdealPropertiesofAir.T(rows);
+hLow = IdealPropertiesofAir.h(rows);
+
+t3 = vpasolve((THigh-TLow)/(hHigh-hLow) == (THigh-t3)/(hHigh-h4),t3);
+%% Solve for specific entropy after stage 1 of compressor
+%Find Higher Properties for Interpolation
+rows = find(IdealPropertiesofAir.h>h4,1);
+hHigh = IdealPropertiesofAir.h(rows);
+sHigh = IdealPropertiesofAir.s(rows);
+
+%Find Lower Properties for Interpolation
+rows = find(IdealPropertiesofAir.h<h4,1,'last');
+hLow = IdealPropertiesofAir.h(rows);
+sLow = IdealPropertiesofAir.s(rows);
+
+syms ent3
+ent3 = vpasolve((h4-hLow)/(ent3 - sLow)==(hHigh-hLow)/(sHigh-sLow),ent3);
+
+%% Solve for specific volume after stage 1 of compressor
+
+%interpolate for vf
+
+%Find Higher Properties for Interpolation
+rows = find(IdealPropertiesofAir.h>h4,1);
+hHigh = IdealPropertiesofAir.h(rows);
+vfHigh = IdealPropertiesofAir.vf(rows);
+
+%Find Lower Properties for Interpolation
+rows = find(IdealPropertiesofAir.h<h4,1,'last');
+hLow = IdealPropertiesofAir.h(rows);
+vfLow = IdealPropertiesofAir.vf(rows);
+
+syms vf3
+vf3 = vpasolve((h4-hLow)/(vf3 - vfLow)==(hHigh-hLow)/(vfHigh-vfLow),vf3);
+%still need to ind v final
+
+    speciv3 = vf3 * R * Tc / Pc;
+    
+    %pf2 = pf2 * 1/(40.^(j/4));%vpasolve((h2w-hLow)/(pf2 - pfLow)==(hHigh-hLow)/(pfHigh-pfLow),pf2);
+
+%  Ideal pressure after first compressor
+P2s = 1983.4 * (1/(40.^(j/4)));
+%resets initial variables as new state
+
+statevariables.p(j+16) = P2s;
+statevariables.v(j+16) = speciv3;
+statevariables.T(j+16) = t3;
+statevariables.s(j+16) = ent3;
+% Initial Temperature (K)
+%T0 = t3;
+% Initial Pressure (kPa)
+
+
+% Initial Reduced Pressure
+%pr1 = pf2
+%P0 = P2s;%Not sure about this one: where is p @state 2 calculated?
+%h
+%h1=h2w;
+end
+
+
 
