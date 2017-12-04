@@ -76,7 +76,7 @@ h1 = vpasolve((T0-TLow)/(h1-hLow) == (THigh-TLow)/(hHigh-hLow),h1);
 for i = 1:1:14% loop to make this repeat 14 times
 %P2s = cpr * P0;
 
-pr2s = 40.^(i/14) * pr1;
+pr2s = %pr1*40.^(i/14) 
 
 %%
 %Find Higher Properties for Interpolation
@@ -96,7 +96,7 @@ h2s = vpasolve((h2s-hLow)/(pr2s - prLow)==(hHigh-hLow)/(prHigh-prLow),h2s);
 % solve for unknown h2w (actual h2 after compression)
 
 syms h2w
-h2w = vpasolve(ce == (h2s - h1)/(h2w - h1),h2w);
+h2w = vpasolve(ce == (h2s - h1)/(h2w - h1),h2w)
 
 %% Solve for Temperature after stage 1 of compressor
 %Interpolate T from h
@@ -172,13 +172,13 @@ statevariables.s(i+1) = ent;
 %resets initial variables as new state
 % Initial Temperature (K)
 T0 = t2;
-% Initial Pressure (kPa)
 
 %  Ideal pressure after first compressor
-P2s = 40.^(i/14) * 49.586;
+P2s = 40.^(i/14)* 49.586;
 % Initial Reduced Pressure
-%pr1 = pf2
+% Initial Pressure (kPa)
 P0 = P2s;%Not sure about this one: where is p @state 2 calculated?
+%pr1 = pf2
 %h
 h1=h2w;
 
