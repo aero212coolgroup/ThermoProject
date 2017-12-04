@@ -1,4 +1,8 @@
 % Values for table: T h u s pf vf
+while exist('IdealPropertiesofAir','var') ~= 1%prompts you to upload the table if if it isn't already in the workspace
+uiimport('Ideal Properties of Air.txt')
+pause(15)
+end
 % Velocity in (m/s)
 vin = 76.38888;
 % Air Mass Flow Rate (kg/s)
@@ -36,9 +40,9 @@ M = 28.97;
 z=zeros(21);
 statevariables = table(z(:,1),z(:,1),z(:,1),z(:,1),'VariableNames',{'p','v','T','s'},'RowNames',{'cinitial','c1','c2','c3','c4','c5','c6','c7','c8','c9','c10','c11','c12','c13','c14','combust','t1','t2','t3','t4','n'});%,'RowNames',{'cinitial','c1','c2','c3','c4','c5','c6','c7','c8','c9','c10','c11','c12','c13','c14','combust','t1','t2','t3','t4','n'};
 %put known values into table
-statevariables.T(1) = T0;
-statevariables.p(1) = P0;
-statevariables.v(1) = R*T0/(P0*M);
+statevariables.T(1) = T0;%T in K
+statevariables.p(1) = P0;%P in kPa
+statevariables.v(1) = R*T0/(P0*M);%v in m^3/kg
 
 %interpolate for s initial
 %Find Higher Properties for Interpolation
@@ -129,7 +133,7 @@ syms ent
 ent = vpasolve((h2w-hLow)/(ent - sLow)==(hHigh-hLow)/(sHigh-sLow),ent);
 
 %% Solve for specific volume after stage 1 of compressor
-
+%{
 %interpolate for vf
 
 %Find Higher Properties for Interpolation
@@ -147,7 +151,7 @@ vf2 = vpasolve((h2w-hLow)/(vf2 - vfLow)==(hHigh-hLow)/(vfHigh-vfLow),vf2);
 %still need to ind v final
 
     speciv = vf2 * R * Tc / Pc;
-
+%}
 %interpolate for pr2
 %Find Higher Properties for Interpolation
 rows = find(IdealPropertiesofAir.h>h2w,1);
@@ -166,7 +170,7 @@ pf2 = vpasolve((h2w-hLow)/(pf2 - pfLow)==(hHigh-hLow)/(pfHigh-pfLow),pf2);
 P2s = 40.^(i/14) * 49.586;
 %store all necessary state data in table
 statevariables.p(i+1) = P2s;
-statevariables.v(i+1) = speciv;
+statevariables.v(i+1) = R*t2/(P2s*M);
 statevariables.T(i+1) = t2;
 statevariables.s(i+1) = ent;
 
@@ -195,3 +199,41 @@ QdotMdot = Qdot/mdot_air;
 
 syms h3
 h3 = vpasolve(QdotMdot == h3 - h2w,h3);
+
+
+%Interpolate T from h
+
+syms t2 %t2=temperature after 1st compressor
+
+%Find Higher Properties for Interpolation
+rows = find(IdealPropertiesofAir.h>h3,1);
+THigh = IdealPropertiesofAir.T(rows);
+hHigh = IdealPropertiesofAir.h(rows);
+
+%Find Lower Properties for Interpolation
+rows = find(IdealPropertiesofAir.h<h3,1,'last');
+TLow = IdealPropertiesofAir.T(rows);
+hLow = IdealPropertiesofAir.h(rows);
+
+t2 = vpasolve((THigh-TLow)/(hHigh-hLow) == (t2-TLow)/(h3-hLow),t2);
+
+%solve for s from h
+%Find Higher Properties for Interpolation
+rows = find(IdealPropertiesofAir.h>h3,1);
+hHigh = IdealPropertiesofAir.h(rows);
+sHigh = IdealPropertiesofAir.s(rows);
+
+%Find Lower Properties for Interpolation
+rows = find(IdealPropertiesofAir.h<h3,1,'last');
+hLow = IdealPropertiesofAir.h(rows);
+sLow = IdealPropertiesofAir.s(rows);
+
+syms ent
+ent = vpasolve((h3-hLow)/(ent - sLow)==(hHigh-hLow)/(sHigh-sLow),ent);
+
+statevariables.p(16) = statevariables.p(15);
+statevariables.v(16) = R*t2/(statevariables.p(15)*M);
+statevariables.T(16) = t2;
+statevariables.s(16) = ent;
+
+
