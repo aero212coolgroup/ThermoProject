@@ -37,6 +37,8 @@ M = 28.97;
 mdotaft = (-400 + 110 * mdot)/3600;
 % Nozzle exit area (m^2)
 Narea = 0.5 * 0.3;
+%initial entropy(kj/(kg*K)
+sint = 7.619;
 
 %initializing table
 %table collects data about states after the listed change
@@ -47,22 +49,7 @@ statevariables = table(z(:,1),z(:,1),z(:,1),z(:,1),'VariableNames',{'p','v','T',
 statevariables.T(1) = T0;%T in K
 statevariables.p(1) = P0;%P in kPa
 statevariables.v(1) = R*T0/(P0*M);%v in m^3/kg
-
-%interpolate for s initial
-%Find Higher Properties for Interpolation
-rows = find(IdealPropertiesofAir.T>T0,1);
-THigh = IdealPropertiesofAir.T(rows);
-sHigh = IdealPropertiesofAir.s(rows);
-
-%Find Lower Properties for Interpolation
-rows = find(IdealPropertiesofAir.T<T0,1,'last');
-TLow = IdealPropertiesofAir.T(rows);
-sLow = IdealPropertiesofAir.s(rows);
-
-% Solve for unknown s1 (Initial Entropy)
-syms s1
-s1 = vpasolve((T0-TLow)/(s1-sLow) == (THigh-TLow)/(sHigh-sLow),s1);
-statevariables.s(1) = s1;
+statevariables.s(1) = sint;
 %%  Initial Values
 
 
@@ -80,11 +67,12 @@ hLow = IdealPropertiesofAir.h(rows);
 % Solve for unknown h1 (Initial Enthalpy)
 syms h1
 h1 = vpasolve((T0-TLow)/(h1-hLow) == (THigh-TLow)/(hHigh-hLow),h1);
+entlast = 1.59634;
 
 for i = 1:1:14% loop to make this repeat 14 times
 %P2s = cpr * P0;
 
-pr2s = 40.^(i/14) * pr1
+pr2s = 40.^(i/14) * pr1;
 
 %%
 %Find Higher Properties for Interpolation
@@ -99,7 +87,7 @@ hLow = IdealPropertiesofAir.h(rows);
 
 %solve for unknown h2s (Ideal enthalpy after compression)
 syms h2s
-h2s = vpasolve((h2s-hLow)/(pr2s - prLow)==(hHigh-hLow)/(prHigh-prLow),h2s)
+h2s = vpasolve((h2s-hLow)/(pr2s - prLow)==(hHigh-hLow)/(prHigh-prLow),h2s);
 
 % solve for unknown h2w (actual h2 after compression)
 
@@ -137,25 +125,7 @@ syms ent
 ent = vpasolve((h2w-hLow)/(ent - sLow)==(hHigh-hLow)/(sHigh-sLow),ent);
 
 %% Solve for specific volume after stage 1 of compressor
-%{
-%interpolate for vf
 
-%Find Higher Properties for Interpolation
-rows = find(IdealPropertiesofAir.h>h2w,1);
-hHigh = IdealPropertiesofAir.h(rows);
-vfHigh = IdealPropertiesofAir.vf(rows);
-
-%Find Lower Properties for Interpolation
-rows = find(IdealPropertiesofAir.h<h2w,1,'last');
-hLow = IdealPropertiesofAir.h(rows);
-vfLow = IdealPropertiesofAir.vf(rows);
-
-syms vf2
-vf2 = vpasolve((h2w-hLow)/(vf2 - vfLow)==(hHigh-hLow)/(vfHigh-vfLow),vf2);
-%still need to ind v final
-
-    speciv = vf2 * R * Tc / Pc;
-%}
 %interpolate for pr2
 %Find Higher Properties for Interpolation
 rows = find(IdealPropertiesofAir.h>h2w,1);
@@ -176,9 +146,11 @@ P2s = 40.^(i/14) * 49.586;
 statevariables.p(i+1) = P2s;
 statevariables.v(i+1) = R*t2/(P2s*M);
 statevariables.T(i+1) = t2;
-statevariables.s(i+1) = ent;
+scurrent = ent-entlast-R/M*log(statevariables.p(i+1)/statevariables.p(i)) + statevariables.s(i)
+statevariables.s(i+1) = ent-entlast-R/M*log(14/40) + statevariables.s(i);
 
-%resets initial variables as new state
+entlast = ent;
+%resets final variables as new state
 % Initial Temperature (K)
 T0 = t2;
 % Initial Pressure (kPa)
@@ -190,9 +162,7 @@ P0 = P2s;%Not sure about this one: where is p @state 2 calculated?
 %h
 h1=h2w;
 
-end % still needs a way to tabulate data
-%% Put in loop to iterate 14 times
-%% 
+end  
 
 % Calculate the heat addition by the combustion chamber 
 mdot_air = 51.6083;
@@ -239,12 +209,13 @@ ent = vpasolve((h3-hLow)/(ent - sLow)==(hHigh-hLow)/(sHigh-sLow),ent);
 statevariables.p(16) = statevariables.p(15);
 statevariables.v(16) = R*t2/(statevariables.p(15)*M);
 statevariables.T(16) = t2;
-statevariables.s(16) = ent;
+statevariables.s(16) = ent-entlast-R/M*log(statevariables.p(16)/statevariables.p(15)) + statevariables.s(15);
+entlast = ent;
 
 for j = 1:1:4% loop to make this repeat 4 times
 %P2s = cpr * P0;
 
-pr3s = 1/(1.46275964.^(j/4)) * pr2s;
+pr3s = 1/(1.46275964^(j/4)) * pr2s;
 
 %%
 %Find Higher Properties for Interpolation
@@ -323,9 +294,11 @@ P2s = 1983.4 * 1/(1.46275964.^(j/4));
 %resets initial variables as new state
 
 statevariables.p(j+16) = P2s;
-statevariables.v(j+16) = speciv3;
+statevariables.v(j+16) = R*t2/(statevariables.p(j+16)*M);
 statevariables.T(j+16) = t3;
-statevariables.s(j+16) = ent3;
+statevariables.s(j+16) = -R/M*log(statevariables.p(j+16)/statevariables.p(j+15)) + statevariables.s(j+15);
+
+entlast = ent3;
 % Initial Temperature (K)
 %T0 = t3;
 % Initial Pressure (kPa)
@@ -375,9 +348,11 @@ syms ent
 ent = vpasolve((h5-hLow)/(ent - sLow)==(hHigh-hLow)/(sHigh-sLow),ent);
 
 statevariables.p(21) = statevariables.p(20);
-statevariables.v(21) = R*t3/(statevariables.p(15)*M);
+statevariables.v(21) = R*t3/(statevariables.p(21)*M);
 statevariables.T(21) = t3;
-statevariables.s(21) = ent;
+statevariables.s(21) = ent-entlast-R/M*log(statevariables.p(21)/statevariables.p(20)) + statevariables.s(20);
+
+entlast = ent;
 
 %% Nozzle Section
 
@@ -416,7 +391,8 @@ syms ent
 ent = vpasolve((h6-hLow)/(ent - sLow)==(hHigh-hLow)/(sHigh-sLow),ent);
 
 statevariables.p(22) = statevariables.p(15);
-statevariables.v(22) = R*t3/(statevariables.p(15)*M);
+statevariables.v(22) = R*t3/(statevariables.p(22)*M);
 statevariables.T(22) = t3;
-statevariables.s(22) = ent;
+statevariables.s(22) = R/M*log(statevariables.p(22)/statevariables.p(21)) + statevariables.s(21);
+
 
