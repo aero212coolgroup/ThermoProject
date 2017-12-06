@@ -146,8 +146,8 @@ P2s = 40.^(i/14) * 49.586;
 statevariables.p(i+1) = P2s;
 statevariables.v(i+1) = R*t2/(P2s*M);
 statevariables.T(i+1) = t2;
-scurrent = ent-entlast-R/M*log(statevariables.p(i+1)/statevariables.p(i)) + statevariables.s(i)
-statevariables.s(i+1) = ent-entlast-R/M*log(14/40) + statevariables.s(i);
+scurrent = ent-entlast-R/M*log(statevariables.p(i+1)/statevariables.p(i)) + statevariables.s(i);
+statevariables.s(i+1) = ent-entlast-R/M*log(statevariables.p(i+1)/statevariables.p(i)) + statevariables.s(i);
 
 entlast = ent;
 %resets final variables as new state
@@ -296,7 +296,7 @@ P2s = 1983.4 * 1/(1.46275964.^(j/4));
 statevariables.p(j+16) = P2s;
 statevariables.v(j+16) = R*t2/(statevariables.p(j+16)*M);
 statevariables.T(j+16) = t3;
-statevariables.s(j+16) = -R/M*log(statevariables.p(j+16)/statevariables.p(j+15)) + statevariables.s(j+15);
+statevariables.s(j+16) = ent3-entlast-R/M*log(statevariables.p(j+16)/statevariables.p(j+15)) + statevariables.s(j+15);
 
 entlast = ent3;
 % Initial Temperature (K)
@@ -393,6 +393,6 @@ ent = vpasolve((h6-hLow)/(ent - sLow)==(hHigh-hLow)/(sHigh-sLow),ent);
 statevariables.p(22) = statevariables.p(15);
 statevariables.v(22) = R*t3/(statevariables.p(22)*M);
 statevariables.T(22) = t3;
-statevariables.s(22) = R/M*log(statevariables.p(22)/statevariables.p(21)) + statevariables.s(21);
+statevariables.s(22) = ent-entlast-R/M*log(statevariables.p(22)/statevariables.p(21)) + statevariables.s(21);
 
 
