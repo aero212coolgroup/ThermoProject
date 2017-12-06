@@ -67,7 +67,7 @@ hLow = IdealPropertiesofAir.h(rows);
 % Solve for unknown h1 (Initial Enthalpy)
 syms h1
 h1 = vpasolve((T0-TLow)/(h1-hLow) == (THigh-TLow)/(hHigh-hLow),h1);
-entlast = 1.59634;
+entlast = 1.54138;
 
 for i = 1:1:14% loop to make this repeat 14 times
 %P2s = cpr * P0;
@@ -164,6 +164,7 @@ h1=h2w;
 
 end  
 
+
 % Calculate the heat addition by the combustion chamber 
 mdot_air = 113.026;%kg/s
 Qcomb = 43360;%kj/kg
@@ -217,27 +218,27 @@ for j = 1:1:4% loop to make this repeat 4 times
 
 
 %pr3s = 1/(40.^(j/4) * pr2s;
-pr3s = 1/(1.46275964^(j/4)) * pr2s;
-
+%pr3s = 1/(1.46275964^(j/4)) * pr2s;
+syms h4
+h4 = h3 - (478.8844/4)*j;
 %%
 %Find Higher Properties for Interpolation
-rows = find(IdealPropertiesofAir.pf>pr3s,1);
+rows = find(IdealPropertiesofAir.h>h4,1);
 prHigh = IdealPropertiesofAir.pf(rows);
 hHigh = IdealPropertiesofAir.h(rows);
 
 %Find Lower Properties for Interpolation
-rows = find(IdealPropertiesofAir.pf<pr3s,1,'last');
+rows = find(IdealPropertiesofAir.h<h3,1,'last');
 prLow = IdealPropertiesofAir.pf(rows);
 hLow = IdealPropertiesofAir.h(rows);
 
-%solve for unknown h2s (Ideal enthalpy after compression)
-syms h3s
-h3s = vpasolve((hHigh-h3s)/(prHigh-pr3s)==(hHigh-hLow)/(prHigh-prLow),h3s);
+
 
 % solve for unknown h2w (actual h2 after compression)
 
-syms h4
-h4 = vpasolve(.94 == (h4 - h3)/(h3s-h3),h4);
+%solve for unknown h2s (Ideal enthalpy after compression)
+syms h4s
+h4s = vpasolve((hHigh-h4s)/(prHigh-pr3s)==(hHigh-hLow)/(prHigh-prLow),h4s);
 
 %% Solve for Temperature after stage 1 of compressor
 %Interpolate T from h
@@ -298,7 +299,7 @@ P2s = 1983.4 * 1/(1.46275964.^(j/4));
 statevariables.p(j+16) = P2s;
 statevariables.v(j+16) = R*t2/(statevariables.p(j+16)*M);
 statevariables.T(j+16) = t3;
-statevariables.s(j+16) = ent3-entlast-R/M*log(statevariables.p(j+16)/statevariables.p(j+15)) + statevariables.s(j+15);
+statevariables.s(j+16) = entlast-ent3-R/M*log(statevariables.p(j+16)/statevariables.p(j+15)) + statevariables.s(16);
 
 entlast = ent3;
 
@@ -351,13 +352,13 @@ statevariables.v(21) = R*t3/(statevariables.p(21)*M);
 statevariables.T(21) = t3;
 statevariables.s(21) = ent-entlast-R/M*log(statevariables.p(21)/statevariables.p(20)) + statevariables.s(20);
 
-entlast = ent;
+apple = entlast;
 
 %% Nozzle Section
 
 syms h6
 
-h6 = vpasolve(0.94 == (h5 - h6) / (h5 - 255.7226), h6);
+h6 = vpasolve(0.92 == (h5 - h6) / (h5 - 255.7226), h6);
 
 %Interpolate T from h
 
@@ -387,11 +388,12 @@ hLow = IdealPropertiesofAir.h(rows);
 sLow = IdealPropertiesofAir.s(rows);
 
 syms ent
-ent = vpasolve((h6-hLow)/(ent - sLow)==(hHigh-hLow)/(sHigh-sLow),ent);
+ent = vpasolve((h6-hLow)/(sHigh - ent)==(hHigh-hLow)/(sHigh-sLow),ent);
 
-statevariables.p(22) = statevariables.p(15);
+statevariables.p(22) = statevariables.p(1);
 statevariables.v(22) = R*t3/(statevariables.p(22)*M);
 statevariables.T(22) = t3;
-statevariables.s(22) = ent-entlast-R/M*log(statevariables.p(22)/statevariables.p(21)) + statevariables.s(21);
+statevariables.s(22) = ent-apple-R/M*log(statevariables.p(22)/statevariables.p(21)) + statevariables.s(21);
 
+poop =  ent-apple-R/M*log(statevariables.p(22)/statevariables.p(21));
 
