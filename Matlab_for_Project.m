@@ -4,15 +4,15 @@ uiimport('Ideal Properties of Air.txt')
 pause(15)
 end
 % Velocity in (m/s)
-vin = 76.38888;
+vin = 152.7778;
 % Air Mass Flow Rate (kg/s)
-mdot = 51.6083;
+mdot = 113.026;
 % Fuel + Air Mass Flow Rate (kg/hr)
-FAmdot = 3338.4583;
+FAmdot = 6716.4;
 
 %% Assumptions
 % Air Density (kg/m^3)
-ro = 0.6756;
+ro = 0.6759;
 % Initial Temperature (K)
 T0 = 255.65;
 % Initial Pressure (kPa)
@@ -165,11 +165,11 @@ h1=h2w;
 end  
 
 % Calculate the heat addition by the combustion chamber 
-mdot_air = 51.6083;
-Qcomb = 43360;
-mdot_comb = 0.92733333;
+mdot_air = 113.026;%kg/s
+Qcomb = 43360;%kj/kg
+mdot_comb = 1.86568;%kg/s
 Qdot = Qcomb * mdot_comb;
-QdotMdot = Qdot/mdot_air;
+QdotMdot = Qdot/(mdot_air-mdot_comb);
 
 syms h3
 h3 = vpasolve(QdotMdot == h3 - h2w,h3);
@@ -178,7 +178,7 @@ h3 = vpasolve(QdotMdot == h3 - h2w,h3);
 
 %Interpolate T from h
 
-syms t2 %t2=temperature after 1st compressor
+syms t2 
 
 %Find Higher Properties for Interpolation
 rows = find(IdealPropertiesofAir.h>h3,1);
@@ -215,6 +215,8 @@ entlast = ent;
 for j = 1:1:4% loop to make this repeat 4 times
 %P2s = cpr * P0;
 
+
+%pr3s = 1/(40.^(j/4) * pr2s;
 pr3s = 1/(1.46275964^(j/4)) * pr2s;
 
 %%
@@ -289,7 +291,7 @@ vf3 = vpasolve((h4-hLow)/(vf3 - vfLow)==(hHigh-hLow)/(vfHigh-vfLow),vf3);
     
     %pf2 = pf2 * 1/(40.^(j/4));%vpasolve((h2w-hLow)/(pf2 - pfLow)==(hHigh-hLow)/(pfHigh-pfLow),pf2);
 
-%  Ideal pressure after first compressor
+%P2s = 1/40.^(j/4) * 1983.4;
 P2s = 1983.4 * 1/(1.46275964.^(j/4));
 %resets initial variables as new state
 
@@ -299,9 +301,6 @@ statevariables.T(j+16) = t3;
 statevariables.s(j+16) = ent3-entlast-R/M*log(statevariables.p(j+16)/statevariables.p(j+15)) + statevariables.s(j+15);
 
 entlast = ent3;
-% Initial Temperature (K)
-%T0 = t3;
-% Initial Pressure (kPa)
 
 
 % Initial Reduced Pressure
